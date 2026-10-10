@@ -1,0 +1,34 @@
+## Interface: 120100
+## Title: Marquee
+## Notes: A simpler way to choose your title, in the Character window.
+## Author: Remul
+## Version: 0.1.0
+## SavedVariables: MarqueeDB
+## SavedVariablesPerCharacter: MarqueeCharDB
+## IconTexture: Interface\AddOns\Marquee\Media\Icon
+## AddonCompartmentFunc: Marquee_OnAddonCompartmentClick
+## Category-enUS: Character
+## Category-deDE: Charakter
+## Category-esES: Personaje
+## Category-esMX: Personaje
+## Category-frFR: Personnage
+## Category-itIT: Personaggio
+## Category-koKR: 캐릭터
+## Category-ptBR: Personagem
+## Category-ruRU: Персонаж
+## Category-zhCN: 角色
+## Category-zhTW: 角色
+
+Locales\Locales.lua
+Locales\deDE.lua
+Locales\frFR.lua
+Locales\itIT.lua
+Locales\ruRU.lua
+Core.lua
+Data\TitleData.lua
+Data\Titles.lua
+UI\Options.lua
+UI\TitleList.lua
+UI\TitlesPane.lua
+UI\Outfits.lua
+UI\OutfitPicker.lua

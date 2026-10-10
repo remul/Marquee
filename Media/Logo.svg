@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720">
+  <title>Marquee</title>
+  <!-- Emblem (see Emblem.svg) with the name below, on a dark card. -->
+  <rect width="720" height="720" rx="36" fill="#141922"/>
+  <g transform="translate(150 58) scale(0.82)">
+    <path d="M116,24 L396,24 L488,116 L488,396 L396,488 L116,488 L24,396 L24,116 Z"
+          fill="#e9b649" stroke="#3a2709" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M129.2,46 L382.8,46 L466,129.2 L466,382.8 L382.8,466 L129.2,466 L46,382.8 L46,129.2 Z"
+          fill="#5b2a86" stroke="#3a2709" stroke-width="4" stroke-linejoin="round"/>
+    <!-- The sign: a cream board with unlit bulbs around a field-coloured panel, and a star in the middle. -->
+    <rect x="110" y="158" width="292" height="200" rx="22" fill="#fff2d4"/>
+    <g fill="#5b2a86">
+      <circle cx="130" cy="178" r="9"/>
+      <circle cx="130" cy="338" r="9"/>
+      <circle cx="166" cy="178" r="9"/>
+      <circle cx="166" cy="338" r="9"/>
+      <circle cx="202" cy="178" r="9"/>
+      <circle cx="202" cy="338" r="9"/>
+      <circle cx="238" cy="178" r="9"/>
+      <circle cx="238" cy="338" r="9"/>
+      <circle cx="274" cy="178" r="9"/>
+      <circle cx="274" cy="338" r="9"/>
+      <circle cx="310" cy="178" r="9"/>
+      <circle cx="310" cy="338" r="9"/>
+      <circle cx="346" cy="178" r="9"/>
+      <circle cx="346" cy="338" r="9"/>
+      <circle cx="382" cy="178" r="9"/>
+      <circle cx="382" cy="338" r="9"/>
+      <circle cx="130" cy="218" r="9"/>
+      <circle cx="382" cy="218" r="9"/>
+      <circle cx="130" cy="258" r="9"/>
+      <circle cx="382" cy="258" r="9"/>
+      <circle cx="130" cy="298" r="9"/>
+      <circle cx="382" cy="298" r="9"/>
+    </g>
+    <rect x="152" y="200" width="208" height="116" rx="10" fill="#5b2a86"/>
+    <path d="M256.0,202.0 L269.5,239.4 L309.3,240.7 L277.9,265.1 L288.9,303.3 L256.0,281.0 L223.1,303.3 L234.1,265.1 L202.7,240.7 L242.5,239.4 Z" fill="#fff2d4"/>
+    <!-- Two posts under the sign. -->
+    <rect x="166" y="358" width="22" height="58" rx="4" fill="#fff2d4"/>
+    <rect x="324" y="358" width="22" height="58" rx="4" fill="#fff2d4"/>
+  </g>
+  <text x="360" y="600" text-anchor="middle" font-family="Copperplate, 'Copperplate Gothic Bold', Georgia, serif" font-weight="bold"
+        font-size="104" letter-spacing="8" fill="#e9b649" stroke="#3a2709" stroke-width="3" paint-order="stroke">MARQUEE</text>
+</svg>

@@ -3,9 +3,11 @@ local L = ns.L
 local Titles = ns.Titles
 
 -- A title for each transmog outfit, chosen in the transmog window's character preview (see
--- OutfitPicker) and worn when the outfit is put on by hand: from the transmog window, or with the
--- outfit on one of Blizzard's action bars (click or key). Setting a title needs a click or key
--- press, so outfits the game switches to by itself (situations) don't change the title.
+-- OutfitPicker) and worn when the outfit is put on by hand: from the transmog window (its icon, or
+-- saving changes to it, which puts it on too), or with the outfit on one of Blizzard's action bars
+-- (click or key). Choosing a title for the outfit you're wearing wears it right away. Setting a
+-- title needs a click or key press, so outfits the game switches to by itself (situations) don't
+-- change the title.
 local Outfits = {}
 ns.Outfits = Outfits
 
@@ -66,6 +68,13 @@ local function WearOutfitTitle(outfitID, cooldown)
     Titles.Wear(choice)
 end
 
+-- Called when a title is chosen for an outfit, from that click: wears it if it's the outfit worn.
+function Outfits.OnChoiceChanged(outfitID)
+    if outfitID == C_TransmogOutfitInfo.GetActiveOutfitID() then
+        WearOutfitTitle(outfitID)
+    end
+end
+
 -- "Title: the Kingslayer" in an outfit's tooltip, for outfits with a title.
 local function AddTooltipLine(tooltip, outfitID)
     local choice = Outfits.GetChoice(outfitID)
@@ -114,6 +123,11 @@ function Outfits:Setup()
     -- In the transmog window, clicking an outfit's icon puts it on with this.
     hooksecurefunc(C_TransmogOutfitInfo, "ChangeDisplayedOutfit", function(outfitID)
         WearOutfitTitle(outfitID, OUTFIT_SPELL_ID and C_Spell.GetSpellCooldown(OUTFIT_SPELL_ID))
+    end)
+    -- Save Outfit ("Save and apply outfit changes", or its gold / discount question) saves the outfit
+    -- shown and puts it on. It's only enabled when that can be done, so no cooldown check.
+    hooksecurefunc(C_TransmogOutfitInfo, "CommitAndApplyAllPending", function()
+        WearOutfitTitle(C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID())
     end)
 
     -- Blizzard's action bars: clicks, and keys (which don't click the button).

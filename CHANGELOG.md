@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1
+
+- **Outfit titles follow Save Outfit**: saving changes to an outfit puts it on, so its title is
+  worn too.
+- **Choosing a title for the outfit you're wearing** wears it right away, instead of the next time
+  you put the outfit on.
+
 ## 0.1.0
 
 - First version.

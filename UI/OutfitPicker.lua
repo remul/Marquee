@@ -68,10 +68,12 @@ local function Refresh()
         ScrollBoxConstants.RetainScrollPosition)
 end
 
+-- Saves the choice for the outfit shown; for the outfit you're wearing, the title changes too.
 local function Choose(choice)
     local outfitID = GetOutfitID()
     if outfitID then
         Outfits.SetChoice(outfitID, choice)
+        Outfits.OnChoiceChanged(outfitID)
     end
     PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
     picker:Hide()

@@ -34,8 +34,9 @@ its own, and looks and feels like the rest of the game's interface.
 
 - In the transmog window, **Title** at the top right of the character preview shows the outfit's
   title. Click it to choose one from a list like the Titles list (filters, search, favourites).
-- Putting the outfit on wears its title: in the transmog window, or with the outfit on Blizzard's
-  action bars (click or key). The outfit's tooltip shows its title.
+- Putting the outfit on wears its title: in the transmog window (clicking the outfit, or saving
+  changes to it), or with the outfit on Blizzard's action bars (click or key). Choosing a title for
+  the outfit you're wearing wears it right away. The outfit's tooltip shows its title.
 - The game only lets addons change your title from a click or key press, so outfits the game
   switches to by itself don't change the title. Neither does using an outfit while it's on
   cooldown.

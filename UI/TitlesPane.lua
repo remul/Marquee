@@ -49,6 +49,7 @@ local function UpdateCard(button)
     -- Only real titles have a star: not "No Title" or the Random rows.
     star:SetShown(button.titleId > 0 and (favorite or hovered))
     star.Icon:SetAtlas(favorite and "auctionhouse-icon-favorite" or "auctionhouse-icon-favorite-off")
+    TitleList.FitText(button.text, button.MarqueeFill, star:IsShown())
 end
 
 local function CreateStar(button)
@@ -98,19 +99,18 @@ local function CreateCard(button)
     button.MarqueeStar:SetPoint("RIGHT", button.MarqueeFill, "RIGHT", -6, 0)
     button:GetHighlightTexture():SetAlpha(0)
     button:SetScript("OnClick", OnCardClick)
+    -- The right side is set by TitleList.FitText.
     button.text:ClearAllPoints()
     button.text:SetPoint("LEFT", button.MarqueeFill, "LEFT", 10, 0)
-    button.text:SetPoint("RIGHT", button.MarqueeStar, "LEFT", -4, 0)
-    -- One line for every title: long ones end in "..." (Blizzard's wrap to two lines when they fit),
-    -- and their tooltip shows the whole title.
+    -- One line for every title (Blizzard's wrap to two lines when they fit): long ones get a smaller
+    -- font, and if that isn't enough end in "...", with the whole title in their tooltip.
     button.text:SetWordWrap(false)
+    button:HookScript("OnSizeChanged", function()
+        TitleList.FitFont(button.text, button.MarqueeFill)
+    end)
     button:HookScript("OnEnter", function()
         UpdateCard(button)
-        if button.text:IsTruncated() then
-            GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
-            GameTooltip:SetText(button.text:GetText())
-            GameTooltip:Show()
-        end
+        TitleList.ShowFullTitle(button, button.text, button.MarqueeFill)
     end)
     button:HookScript("OnLeave", function()
         UpdateCard(button)
@@ -133,6 +133,7 @@ local function UpdateButton(button, elementData)
     end
     -- Rows are reused, so titles get their gold back.
     TitleList.SetTextColor(button.text, button.titleId)
+    TitleList.FitFont(button.text, button.MarqueeFill)
     UpdateCard(button)
 end
 

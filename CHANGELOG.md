@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- **Long titles fit better** in the Titles list and the outfit title picker: titles too long for a
+  card get a slightly smaller font, and take the star's space while the star doesn't show. While it
+  shows, a long title ends in "..." instead of changing size.
+
 ## 0.2.0
 
 - **Outfit titles for outfits the game puts on by itself** (situations): Marquee asks whether to

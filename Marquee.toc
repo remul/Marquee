@@ -2,7 +2,7 @@
 ## Title: Marquee
 ## Notes: A simpler way to choose your title, in the Character window.
 ## Author: Remul
-## Version: 0.2.0
+## Version: 0.2.1
 ## SavedVariables: MarqueeDB
 ## SavedVariablesPerCharacter: MarqueeCharDB
 ## IconTexture: Interface\AddOns\Marquee\Media\Icon

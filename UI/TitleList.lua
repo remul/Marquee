@@ -86,6 +86,74 @@ function TitleList.AnchorToCard(region)
     region:SetHeight(TitleList.CARD_HEIGHT)
 end
 
+-- A card's text ends this far from the card's right edge, or as far as the star reaches (with a
+-- little space) while the star shows.
+local TEXT_INSET = 10
+local STAR_SPACE = 24
+
+-- Titles too long for a card get a smaller font, down to this much smaller than the normal one.
+local MAX_SHRINK = 2
+
+-- Sets the right side of a card's text (the left is set by the caller): it takes the star's space
+-- while the star doesn't show. A title that doesn't fit ends in "...".
+function TitleList.FitText(text, fill, starShown)
+    text.marqueeRightInset = starShown and STAR_SPACE or TEXT_INSET
+    text:SetPoint("RIGHT", fill, "RIGHT", -text.marqueeRightInset, 0)
+end
+
+-- The font size each title fits at, so redrawing a list (scrolling, typing a search) doesn't
+-- measure it again: [font .. normal size .. width] = { [text] = size }.
+local fittedSizes = {}
+
+-- Gives a title too long for its card (fill) a smaller font, so it fits without the star. Showing
+-- the star doesn't change the size: the title ends in "..." then. Call it when the text or the
+-- card's width changes.
+function TitleList.FitFont(text, fill)
+    local font, size, flags = text:GetFont()
+    if not font then
+        return
+    end
+    -- The normal size, from before any shrinking (rows are reused).
+    text.marqueeFontSize = text.marqueeFontSize or size
+    local normalSize = text.marqueeFontSize
+    local available = fill:GetWidth() - 2 * TEXT_INSET
+    -- No width before the list is laid out: fitted again when the card gets its size.
+    if available <= 0 then
+        text:SetFont(font, normalSize, flags)
+        return
+    end
+    local key = font .. normalSize .. ":" .. floor(available)
+    local sizes = fittedSizes[key]
+    if not sizes then
+        sizes = {}
+        fittedSizes[key] = sizes
+    end
+    local title = text:GetText() or ""
+    local fitted = sizes[title]
+    if not fitted then
+        fitted = normalSize
+        text:SetFont(font, fitted, flags)
+        while fitted > normalSize - MAX_SHRINK and text:GetUnboundedStringWidth() > available do
+            fitted = fitted - 1
+            text:SetFont(font, fitted, flags)
+        end
+        sizes[title] = fitted
+    end
+    if fitted ~= size then
+        text:SetFont(font, fitted, flags)
+    end
+end
+
+-- On hovering a card: a tooltip with the whole title, if it ends in "..." (see FitText).
+function TitleList.ShowFullTitle(owner, text, fill)
+    local width = fill:GetWidth() - TEXT_INSET - (text.marqueeRightInset or TEXT_INSET)
+    if text:GetUnboundedStringWidth() > width then
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+        GameTooltip:SetText(text:GetText())
+        GameTooltip:Show()
+    end
+end
+
 -- Shows the divider below a row's card, or hides it. The divider's space can't be clicked.
 function TitleList.UpdateDivider(row, shown)
     if shown and not row.MarqueeDivider then

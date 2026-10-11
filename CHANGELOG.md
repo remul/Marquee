@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- **Outfit titles for outfits the game puts on by itself** (situations): Marquee asks whether to
+  wear the outfit's title. In Options (**When the game changes your outfit**) your next key press,
+  or click on the game world or an action button, can wear it instead, or the title stays as it
+  is. Never in combat: the title waits until the fight ends.
+- **The gear** next to the search box is grey, and gold while you point at it or its menu is open.
+
 ## 0.1.2
 
 - **37 more titles sorted** into the filter's activities (PvP, quests, reputation, Delves, pet

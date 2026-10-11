@@ -15,6 +15,9 @@ local DEFAULTS = {
     -- Favourite titles shared by the account's characters, shown first in the Titles list:
     -- [titleID] = true.
     favoriteTitles = {},
+    -- What happens when the game puts on an outfit by itself (see SituationTitles): "ask" to wear
+    -- its title, wear it with the next "click", or "off".
+    situationTitles = "ask",
 }
 
 local CHAR_DEFAULTS = {
@@ -25,6 +28,8 @@ local CHAR_DEFAULTS = {
     -- ownFavorites is on (switched in the gear menu above the Titles list).
     ownFavorites = false,
     favoriteTitles = {},
+    -- The outfit last seen worn (activeOutfitID, nil until then), to tell when the game puts on
+    -- another one (see SituationTitles).
 }
 
 local function ApplyDefaults(target, defaults)
@@ -202,6 +207,7 @@ function ns:ADDON_LOADED(loadedName)
         ns.TitlesPane:Setup()
     end)
     ns.Outfits:Setup()
+    ns.SituationTitles:Setup()
     -- The transmog window is loaded when it's first opened.
     EventUtil.ContinueOnAddOnLoaded("Blizzard_Transmog", function()
         ns.OutfitPicker:Setup()

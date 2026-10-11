@@ -37,9 +37,11 @@ its own, and looks and feels like the rest of the game's interface.
 - Putting the outfit on wears its title: in the transmog window (clicking the outfit, or saving
   changes to it), or with the outfit on Blizzard's action bars (click or key). Choosing a title for
   the outfit you're wearing wears it right away. The outfit's tooltip shows its title.
-- The game only lets addons change your title from a click or key press, so outfits the game
-  switches to by itself don't change the title. Neither does using an outfit while it's on
-  cooldown.
+- The game only lets addons change your title from a click or key press. When the game puts on an
+  outfit by itself (its situations, set in the transmog window), Marquee asks whether to wear the
+  outfit's title. In Options you can have your next key press, or click on the game world or an
+  action button, wear it instead, or leave the title as it is. Never in combat: the title waits
+  until the fight ends. Using an outfit while it's on cooldown doesn't change the title.
 
 ### Settings
 

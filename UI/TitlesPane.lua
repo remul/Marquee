@@ -92,8 +92,8 @@ end
 local function CreateCard(button)
     button.MarqueeFill = ns.CreateCardFill(button)
     button.MarqueeOutline = ns.CreateCardOutline(button)
-    TitleList.AnchorToCard(button.MarqueeFill, button)
-    TitleList.AnchorToCard(button.MarqueeOutline, button)
+    TitleList.AnchorToCard(button.MarqueeFill)
+    TitleList.AnchorToCard(button.MarqueeOutline)
     button.MarqueeStar = CreateStar(button)
     button.MarqueeStar:SetPoint("RIGHT", button.MarqueeFill, "RIGHT", -6, 0)
     button:GetHighlightTexture():SetAlpha(0)
@@ -136,10 +136,26 @@ local function UpdateButton(button, elementData)
     UpdateCard(button)
 end
 
+-- The gear is grey, and gold (as drawn) while hovered or while its menu is open.
+local function UpdateOptionsButton(button, hovered)
+    local active = button.menuOpen or hovered
+    local texture = button:GetNormalTexture()
+    texture:SetDesaturated(not active)
+    texture:SetVertexColor(active and 1 or 0.8, active and 1 or 0.8, active and 1 or 0.8)
+end
+
 -- The gear next to the search box: this character's settings, and a button at the bottom for the
 -- account's settings in Blizzard's Options (which can't be opened in combat).
 local function ShowOptionsMenu(button)
     MenuUtil.CreateContextMenu(button, function(_, root)
+        root:AddMenuAcquiredCallback(function()
+            button.menuOpen = true
+            UpdateOptionsButton(button, button:IsMouseOver())
+        end)
+        root:AddMenuReleasedCallback(function()
+            button.menuOpen = false
+            UpdateOptionsButton(button, button:IsMouseOver())
+        end)
         root:CreateTitle(UnitName("player"))
         local ownFavorites = root:CreateCheckbox(ns.L["Own favorites for this character"], function()
             -- (== true only tells the IDE it's a boolean; it can't follow functions on ns.)
@@ -175,11 +191,16 @@ local function CreateOptionsButton()
     button:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
     button:SetScript("OnClick", ShowOptionsMenu)
     button:SetScript("OnEnter", function()
+        UpdateOptionsButton(button, true)
         GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
         GameTooltip:SetText(OPTIONS)
         GameTooltip:Show()
     end)
-    button:SetScript("OnLeave", GameTooltip_Hide)
+    button:SetScript("OnLeave", function()
+        UpdateOptionsButton(button, false)
+        GameTooltip_Hide()
+    end)
+    UpdateOptionsButton(button, false)
     return button
 end
 

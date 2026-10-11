@@ -23,10 +23,22 @@ and it doesn't track or rate titles (no statistics, rarity or achievements).
   outfit during the global cooldown "is on cooldown". Still to see: whether anything else can stop
   a switch without a cooldown running (moving, casting, in combat), as the title would change then.
 
+- Situation titles (check with `/marquee debug`): an outfit the game puts on by itself (spec
+  change, entering a city or a dungeon, across a loading screen) says "The game put on outfit ...";
+  outfits put on by hand don't (no prompt after clicking an outfit or using it on an action bar).
+  `TRANSMOG_DISPLAYED_OUTFIT_CHANGED` is the only event watched, plus loading screens: check it fires
+  with the transmog window closed.
+- **On your next key or click**: a key press (any key, which still works as usual, also typing
+  in chat), a click on the game world (also turning the camera) and a click on an action button each
+  set the title: debug says "Title now ... (as set)", and the game reports no blocked action.
+  (`GLOBAL_MOUSE_DOWN` can't: the game blocks setting a title from it.) Check the keys still work in
+  and after combat, and after a `/reload` in combat.
+- The prompt: looks like the game's dialogs, Escape and Not now drop the title, it hides when
+  combat starts and comes back after, and a second switch updates it instead of opening another.
+
 ## Ideas
 
 - Outfit titles from other action bar addons (Bartender, Dominos, ElvUI): each needs its own hook.
-- For outfits the game switches to by itself: a one-click "Wear this outfit's title?" prompt.
 
 ## Title data
 

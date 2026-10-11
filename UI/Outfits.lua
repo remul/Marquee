@@ -6,8 +6,8 @@ local Titles = ns.Titles
 -- OutfitPicker) and worn when the outfit is put on by hand: from the transmog window (its icon, or
 -- saving changes to it, which puts it on too), or with the outfit on one of Blizzard's action bars
 -- (click or key). Choosing a title for the outfit you're wearing wears it right away. Setting a
--- title needs a click or key press, so outfits the game switches to by itself (situations) don't
--- change the title.
+-- title needs a click or key press, so outfits the game switches to by itself (situations) wear
+-- their title later (see SituationTitles).
 local Outfits = {}
 ns.Outfits = Outfits
 
@@ -51,26 +51,37 @@ local function DescribeCooldown(cooldown)
     return format("start %.2f, duration %.2f, now %.2f", cooldown.startTime, cooldown.duration, GetTime())
 end
 
--- Wears the outfit's title, if it has one and the outfit could be put on: cooldown is the outfit's
--- right after using it (nil if unknown: then it's taken as put on). Runs in the click or key press
--- that used the outfit, as a title can only be changed then.
-local function WearOutfitTitle(outfitID, cooldown)
-    local choice = outfitID and Outfits.GetChoice(outfitID) or Titles.KEEP
-    if choice == Titles.KEEP then
+-- Wears the outfit's title, if it has one. Needs a click or key press.
+local function WearOutfitTitle(outfitID)
+    local choice = Outfits.GetChoice(outfitID)
+    if choice ~= Titles.KEEP then
+        ns:Debug("Outfit", outfitID, "wears", Titles.GetChoiceName(choice))
+        Titles.Wear(choice)
+    end
+end
+
+-- An outfit was used by hand: wears its title if the outfit could be put on. cooldown is the
+-- outfit's right after using it (nil if unknown: then it's taken as put on). Runs in the click or
+-- key press that used the outfit, as a title can only be changed then.
+local function OnOutfitUsed(outfitID, cooldown)
+    if not outfitID then
         return
     end
     if cooldown and not CouldPutOn(cooldown) then
         ns:Debug("Outfit", outfitID, "is on cooldown (" .. DescribeCooldown(cooldown) .. "); title unchanged")
         return
     end
-    ns:Debug("Outfit", outfitID, "wears", Titles.GetChoiceName(choice),
-        "(cooldown: " .. (cooldown and DescribeCooldown(cooldown) or "unknown") .. ")")
-    Titles.Wear(choice)
+    -- So the outfit isn't taken for one the game put on by itself (see SituationTitles).
+    ns.SituationTitles.NoteManualSwitch(outfitID)
+    WearOutfitTitle(outfitID)
 end
 
--- Called when a title is chosen for an outfit, from that click: wears it if it's the outfit worn.
+-- Called when a title is chosen for an outfit, from that click: wears it if it's the outfit worn
+-- (the game may hide which one that is, e.g. in combat).
 function Outfits.OnChoiceChanged(outfitID)
-    if outfitID == C_TransmogOutfitInfo.GetActiveOutfitID() then
+    local activeID = C_TransmogOutfitInfo.GetActiveOutfitID()
+    if not issecretvalue(activeID) and outfitID == activeID then
+        ns.SituationTitles.Drop()
         WearOutfitTitle(outfitID)
     end
 end
@@ -103,7 +114,7 @@ local function OnActionButtonUsed(button, isDown)
     end
     local outfitID = GetActionOutfit(button.action)
     if outfitID then
-        WearOutfitTitle(outfitID, C_ActionBar.GetActionCooldown(button.action))
+        OnOutfitUsed(outfitID, C_ActionBar.GetActionCooldown(button.action))
     end
 end
 
@@ -116,18 +127,20 @@ local function HookActionButton(button)
     hookedButtons[button] = true
     button:HookScript("PostClick", function(_, _, down)
         OnActionButtonUsed(button, down)
+        -- After the outfit's own title, so an outfit used drops a title waiting for another.
+        ns.SituationTitles.OnInput()
     end)
 end
 
 function Outfits:Setup()
     -- In the transmog window, clicking an outfit's icon puts it on with this.
     hooksecurefunc(C_TransmogOutfitInfo, "ChangeDisplayedOutfit", function(outfitID)
-        WearOutfitTitle(outfitID, OUTFIT_SPELL_ID and C_Spell.GetSpellCooldown(OUTFIT_SPELL_ID))
+        OnOutfitUsed(outfitID, OUTFIT_SPELL_ID and C_Spell.GetSpellCooldown(OUTFIT_SPELL_ID))
     end)
     -- Save Outfit ("Save and apply outfit changes", or its gold / discount question) saves the outfit
     -- shown and puts it on. It's only enabled when that can be done, so no cooldown check.
     hooksecurefunc(C_TransmogOutfitInfo, "CommitAndApplyAllPending", function()
-        WearOutfitTitle(C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID())
+        OnOutfitUsed(C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID())
     end)
 
     -- Blizzard's action bars: clicks, and keys (which don't click the button).

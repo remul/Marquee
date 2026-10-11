@@ -91,6 +91,9 @@ function Titles.ResetFilters()
     wipe(ns.db.hiddenActivities)
 end
 
+-- Lowercase names, so typing in a search doesn't lowercase every title again: [name] = lowercase.
+local lowerNames = {}
+
 -- True if the title passes the filters and its name contains the (lowercase) search.
 function Titles.Passes(titleID, name, search)
     local expansion, activity = Titles.GetTags(titleID)
@@ -100,7 +103,15 @@ function Titles.Passes(titleID, name, search)
     if not Titles.IsActivityShown(activity) then
         return false
     end
-    return search == "" or name:lower():find(search, 1, true) ~= nil
+    if search == "" then
+        return true
+    end
+    local lower = lowerNames[name]
+    if not lower then
+        lower = name:lower()
+        lowerNames[name] = lower
+    end
+    return lower:find(search, 1, true) ~= nil
 end
 
 -- Favourite titles, shown first in the list ([titleID] = true): shared by the account's characters,
@@ -147,11 +158,9 @@ function Titles.GetKnownTitleIDs()
     return ids
 end
 
--- Wears a random title of this character's (with favoritesOnly, a random favourite), other than
--- the one worn now if there's a choice. Setting a title needs a click or key press, so this must
--- run from one (a button, a slash command, a key binding). Returns the title's ID, or nil if
--- there's none to choose from.
-function Titles.WearRandom(favoritesOnly)
+-- The titles a random one is picked from (with favoritesOnly, the favourites), other than the one
+-- worn now if there are others.
+local function GetRandomChoices(favoritesOnly)
     local current = GetCurrentTitle()
     local choices, others = {}, {}
     for _, titleID in ipairs(Titles.GetKnownTitleIDs()) do
@@ -159,9 +168,19 @@ function Titles.WearRandom(favoritesOnly)
             tinsert(titleID == current and choices or others, titleID)
         end
     end
-    if #others > 0 then
-        choices = others
-    end
+    return #others > 0 and others or choices
+end
+
+function Titles.HasRandomChoice(favoritesOnly)
+    return #GetRandomChoices(favoritesOnly) > 0
+end
+
+-- Wears a random title of this character's (with favoritesOnly, a random favourite), other than
+-- the one worn now if there's a choice. Setting a title needs a click or key press, so this must
+-- run from one (a button, a slash command, a key binding). Returns the title's ID, or nil if
+-- there's none to choose from.
+function Titles.WearRandom(favoritesOnly)
+    local choices = GetRandomChoices(favoritesOnly)
     if #choices == 0 then
         return nil
     end

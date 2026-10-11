@@ -2,7 +2,7 @@
 ## Title: Marquee
 ## Notes: A simpler way to choose your title, in the Character window.
 ## Author: Remul
-## Version: 0.1.2
+## Version: 0.2.0
 ## SavedVariables: MarqueeDB
 ## SavedVariablesPerCharacter: MarqueeCharDB
 ## IconTexture: Interface\AddOns\Marquee\Media\Icon
@@ -31,4 +31,5 @@ UI\Options.lua
 UI\TitleList.lua
 UI\TitlesPane.lua
 UI\Outfits.lua
+UI\SituationTitles.lua
 UI\OutfitPicker.lua

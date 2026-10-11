@@ -79,7 +79,7 @@ function TitleList.SetupView(view, top, bottom, left, right)
 end
 
 -- Puts region (a card's fill or outline) on the card: the top of the row, as tall as a card.
-function TitleList.AnchorToCard(region, row)
+function TitleList.AnchorToCard(region)
     region:ClearAllPoints()
     region:SetPoint("TOPLEFT")
     region:SetPoint("TOPRIGHT")

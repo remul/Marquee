@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- **37 more titles sorted** into the filter's activities (PvP, quests, reputation, Delves, pet
+  battles, world events, Skyriding, exploration and expansion features); fewer titles are left
+  under Other.
+
 ## 0.1.1
 
 - **Outfit titles follow Save Outfit**: saving changes to an outfit puts it on, so its title is

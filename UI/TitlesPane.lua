@@ -13,6 +13,8 @@ ns.TitlesPane = TitlesPane
 -- by this much.
 local HEADER_HEIGHT = 68
 local pane, searchBox, filterDropdown
+-- The title Enter in the search box wears (see TitleList.GetEnterChoice).
+local enterChoice
 
 -- Shows "No Title", the Random rows, the favourite titles, then the others (each in Blizzard's
 -- order), leaving out the titles that don't pass the search and filters. Blizzard's list of titles
@@ -26,6 +28,7 @@ local function FilterList()
         end
     end
     local favorites, others = TitleList.SplitFavorites(titles, TitleList.GetSearch(searchBox))
+    enterChoice = TitleList.GetEnterChoice(searchBox, favorites, others)
     local choices = TitleList.GetRandomRows(titles)
     tinsert(choices, 1, TitleList.CreateChoiceRow(Titles.NO_TITLE))
     local dataProvider = TitleList.CreateDataProvider({ choices, favorites, others })
@@ -39,11 +42,13 @@ local function Refresh()
     end
 end
 
--- The card's outline (gold for the chosen title) and its star: always on favourites, and on the
--- others while the card is hovered, to make them one. "No Title" has none.
+-- The card's outline (gold for the chosen title, light while hovered or picked by Enter in the
+-- search box) and its star: always on favourites, and on the others while the card is hovered, to
+-- make them one. "No Title" has none.
 local function UpdateCard(button)
     local hovered = button:IsMouseOver()
-    ns.UpdateCardOutline(button.MarqueeOutline, pane.selected == button.titleId, hovered)
+    ns.UpdateCardOutline(button.MarqueeOutline, pane.selected == button.titleId,
+        hovered or button.titleId == enterChoice)
     local favorite = Titles.IsFavorite(button.titleId)
     local star = button.MarqueeStar
     -- Only real titles have a star: not "No Title" or the Random rows.
@@ -225,6 +230,12 @@ local function CreateHeader()
     searchBox:SetHeight(22)
     searchBox:SetAutoFocus(false)
     searchBox:HookScript("OnTextChanged", Refresh)
+    TitleList.SetupSearchEnter(searchBox, function()
+        return enterChoice
+    end, function(titleID)
+        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+        SetCurrentTitle(titleID)
+    end, Refresh)
 end
 
 function TitlesPane:Setup()

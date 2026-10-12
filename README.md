@@ -9,7 +9,7 @@ in your Character window, so there's no new window to open.
 
 ## What it does
 
-- **Search** your titles by name.
+- **Search** your titles by name. Press Enter to wear the first title found.
 - **Filter** your titles by expansion and by activity, like raids, dungeons, Delves, PvP or
   reputation.
 - **Favorites:** click the star on a title to keep it at the top of the list. Favorites are shared

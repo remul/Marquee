@@ -19,6 +19,8 @@ local preview, selector, picker, filterDropdown, searchBox, scrollBox
 -- The character's titles ({ id, name }, by name), read when the picker opens or titles change, so
 -- typing in the search doesn't read them all again.
 local knownTitles = {}
+-- The title Enter in the search box chooses (see TitleList.GetEnterChoice).
+local enterChoice
 
 local function GetOutfitID()
     local outfitID = C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID()
@@ -60,6 +62,7 @@ local function Refresh()
         return
     end
     local favorites, others = TitleList.SplitFavorites(knownTitles, TitleList.GetSearch(searchBox))
+    enterChoice = TitleList.GetEnterChoice(searchBox, favorites, others)
     local choices = { TitleList.CreateChoiceRow(Titles.KEEP), TitleList.CreateChoiceRow(Titles.NO_TITLE) }
     for _, row in ipairs(TitleList.GetRandomRows(knownTitles)) do
         choices[#choices + 1] = row
@@ -80,9 +83,11 @@ local function Choose(choice)
 end
 
 -- A card in the list, like the Titles list's: the chosen one has a gold outline, favourites a star
--- (just a mark here), and long titles end in "..." with the whole title in their tooltip.
+-- (just a mark here), and long titles end in "..." with the whole title in their tooltip. The title
+-- Enter would choose is highlighted like a hovered one.
 local function UpdateRow(row)
-    ns.UpdateCardOutline(row.Outline, row.choice == GetChoice(), row:IsMouseOver())
+    ns.UpdateCardOutline(row.Outline, row.choice == GetChoice(),
+        row:IsMouseOver() or row.choice == enterChoice)
 end
 
 local function InitRow(row, elementData)
@@ -156,6 +161,9 @@ local function CreatePicker()
     searchBox:SetHeight(22)
     searchBox:SetAutoFocus(false)
     searchBox:HookScript("OnTextChanged", Refresh)
+    TitleList.SetupSearchEnter(searchBox, function()
+        return enterChoice
+    end, Choose, Refresh)
 
     local view = CreateScrollBoxListLinearView()
     view:SetElementInitializer("Button", InitRow)

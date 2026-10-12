@@ -55,6 +55,32 @@ function TitleList.SplitFavorites(titles, search)
     return favorites, others
 end
 
+-- The title Enter in the search box picks: the first one the search finds (the first favourite, or
+-- else the first other title), or nil. Only while typing a search (the box has focus and some
+-- text), so a stray Enter does nothing. Its card is highlighted like a hovered one meanwhile.
+function TitleList.GetEnterChoice(searchBox, favorites, others)
+    if not searchBox:HasFocus() or TitleList.GetSearch(searchBox) == "" then
+        return nil
+    end
+    local first = favorites[1] or others[1]
+    return first and first.id
+end
+
+-- Sets up a list's search box: Enter calls choose with the title getChoice returns (see
+-- GetEnterChoice), and refresh redraws the list when the box gains or loses focus, for the
+-- highlight. The choice is read before the box loses focus, which redraws the list without it.
+function TitleList.SetupSearchEnter(searchBox, getChoice, choose, refresh)
+    searchBox:SetScript("OnEnterPressed", function()
+        local choice = getChoice()
+        searchBox:ClearFocus()
+        if choice then
+            choose(choice)
+        end
+    end)
+    searchBox:HookScript("OnEditFocusGained", refresh)
+    searchBox:HookScript("OnEditFocusLost", refresh)
+end
+
 -- A data provider with the rows of each group in turn, each { index, playerTitle } as Blizzard's
 -- Titles list has them. The last row of a group gets dividerAfter when more rows follow.
 function TitleList.CreateDataProvider(groups)
@@ -191,7 +217,7 @@ end
 
 -- Space between an option's name and its number of titles, and the number's grey.
 local COUNT_GAP = 12
-local COUNT_COLOR = CreateColor(0.6, 0.6, 0.6)
+local COUNT_COLOR = CreateColor(0.7, 0.7, 0.7)
 
 -- Shows an option's number of titles in grey at the right edge of the menu, so the numbers line
 -- up. Returns the checkbox's size, as the menu can't work it out with text on both sides.

@@ -176,8 +176,41 @@ function TitleList.SetTextColor(fontString, choice)
     fontString:SetTextColor(color:GetRGB())
 end
 
+-- How many of the character's titles each expansion and activity has: expansions, activities.
+local function CountTitles()
+    local expansions, activities = {}, {}
+    for _, titleID in ipairs(Titles.GetKnownTitleIDs()) do
+        local expansion, activity = Titles.GetTags(titleID)
+        if expansion then
+            expansions[expansion] = (expansions[expansion] or 0) + 1
+        end
+        activities[activity] = (activities[activity] or 0) + 1
+    end
+    return expansions, activities
+end
+
+-- Space between an option's name and its number of titles, and the number's grey.
+local COUNT_GAP = 12
+local COUNT_COLOR = CreateColor(0.6, 0.6, 0.6)
+
+-- Shows an option's number of titles in grey at the right edge of the menu, so the numbers line
+-- up. Returns the checkbox's size, as the menu can't work it out with text on both sides.
+local function AddCount(checkbox, count)
+    checkbox:AddInitializer(function(button)
+        local countText = button:AttachFontString()
+        countText:SetHeight(20)
+        countText:SetPoint("RIGHT", 0, 1)
+        countText:SetJustifyH("RIGHT")
+        countText:SetTextColor(COUNT_COLOR:GetRGB())
+        countText:SetText(count)
+        local width = button.leftTexture1:GetWidth() + 7 + button.fontString:GetUnboundedStringWidth()
+            + COUNT_GAP + countText:GetUnboundedStringWidth()
+        return width, 20
+    end)
+end
+
 -- Adds Check All / Uncheck All and a checkbox per option to a submenu.
-local function AddOptions(menu, changed, options, getName, isShown, setShown, setAllShown)
+local function AddOptions(menu, changed, options, getName, counts, isShown, setShown, setAllShown)
     menu:CreateButton(CHECK_ALL, function()
         setAllShown(true)
         changed()
@@ -190,30 +223,33 @@ local function AddOptions(menu, changed, options, getName, isShown, setShown, se
     end)
     menu:CreateDivider()
     for _, option in ipairs(options) do
-        menu:CreateCheckbox(getName(option), function()
+        local checkbox = menu:CreateCheckbox(getName(option), function()
             return isShown(option)
         end, function()
             setShown(option, not isShown(option))
             changed()
         end)
+        AddCount(checkbox, counts[option] or 0)
     end
 end
 
 -- Makes dropdown (a WowStyle1FilterDropdownTemplate) the Filter button: expansions and activities,
--- with the reset button while something is hidden. changed() runs after every change. The filters
--- are the same everywhere (see Titles).
+-- each with how many titles the character has there (not narrowed by the other filter or the
+-- search), with the reset button while something is hidden. changed() runs after every change.
+-- The filters are the same everywhere (see Titles).
 function TitleList.SetupFilterDropdown(dropdown, changed)
     dropdown:SetText(FILTER)
     dropdown:SetupMenu(function(_, root)
+        local expansionCounts, activityCounts = CountTitles()
         -- Newest expansion first.
         local expansions = {}
         for expansion = Titles.NUM_EXPANSIONS - 1, 0, -1 do
             expansions[#expansions + 1] = expansion
         end
         AddOptions(root:CreateButton(EXPANSION_FILTER_TEXT), changed, expansions, Titles.GetExpansionName,
-            Titles.IsExpansionShown, Titles.SetExpansionShown, Titles.SetAllExpansionsShown)
+            expansionCounts, Titles.IsExpansionShown, Titles.SetExpansionShown, Titles.SetAllExpansionsShown)
         AddOptions(root:CreateButton(ns.L["Activity"]), changed, Titles.ACTIVITIES, Titles.GetActivityName,
-            Titles.IsActivityShown, Titles.SetActivityShown, Titles.SetAllActivitiesShown)
+            activityCounts, Titles.IsActivityShown, Titles.SetActivityShown, Titles.SetAllActivitiesShown)
     end)
     dropdown:SetIsDefaultCallback(function()
         return not Titles.IsFiltered()

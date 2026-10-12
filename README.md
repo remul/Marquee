@@ -41,6 +41,8 @@ The random commands also work in a macro.
   your outfit by itself, Marquee waits for your next key press or click, then wears the outfit's
   title. In the settings you can have Marquee ask first instead.
 - Your title never changes during combat. It changes when the fight is over.
+- The game only lets you change your title a few times in a row. If it says you can't do that
+  right now, wait a moment.
 
 ## Languages
 

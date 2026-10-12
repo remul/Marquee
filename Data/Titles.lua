@@ -91,10 +91,26 @@ function Titles.ResetFilters()
     wipe(ns.db.hiddenActivities)
 end
 
--- Lowercase names, so typing in a search doesn't lowercase every title again: [name] = lowercase.
+-- Lowercase names, so typing in a search doesn't lowercase every title, expansion and activity
+-- again: [name] = lowercase.
 local lowerNames = {}
 
--- True if the title passes the filters and its name contains the (lowercase) search.
+local function Contains(name, search)
+    local lower = lowerNames[name]
+    if not lower then
+        lower = name:lower()
+        lowerNames[name] = lower
+    end
+    return lower:find(search, 1, true) ~= nil
+end
+
+-- True if the title's name contains the (lowercase) search.
+function Titles.NameMatches(name, search)
+    return Contains(name, search)
+end
+
+-- True if the title passes the filters, and its name, expansion or activity contains the
+-- (lowercase) search: "legion" finds Legion's titles, "pvp" the PvP ones.
 function Titles.Passes(titleID, name, search)
     local expansion, activity = Titles.GetTags(titleID)
     if expansion and not Titles.IsExpansionShown(expansion) then
@@ -103,15 +119,11 @@ function Titles.Passes(titleID, name, search)
     if not Titles.IsActivityShown(activity) then
         return false
     end
-    if search == "" then
+    if search == "" or Contains(name, search) then
         return true
     end
-    local lower = lowerNames[name]
-    if not lower then
-        lower = name:lower()
-        lowerNames[name] = lower
-    end
-    return lower:find(search, 1, true) ~= nil
+    return (expansion and Contains(Titles.GetExpansionName(expansion), search))
+        or Contains(Titles.GetActivityName(activity), search)
 end
 
 -- Favourite titles, shown first in the list ([titleID] = true): shared by the account's characters,

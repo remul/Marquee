@@ -55,14 +55,26 @@ function TitleList.SplitFavorites(titles, search)
     return favorites, others
 end
 
+-- The first of titles ({ id, name } each) whose name contains the search, or nil.
+local function FirstNameMatch(titles, search)
+    for _, title in ipairs(titles) do
+        if Titles.NameMatches(title.name, search) then
+            return title
+        end
+    end
+end
+
 -- The title Enter in the search box picks: the first one the search finds (the first favourite, or
--- else the first other title), or nil. Only while typing a search (the box has focus and some
--- text), so a stray Enter does nothing. Its card is highlighted like a hovered one meanwhile.
+-- else the first other title), or nil. Titles found by name come before those found by their
+-- expansion or activity. Only while typing a search (the box has focus and some text), so a stray
+-- Enter does nothing. Its card is highlighted like a hovered one meanwhile.
 function TitleList.GetEnterChoice(searchBox, favorites, others)
-    if not searchBox:HasFocus() or TitleList.GetSearch(searchBox) == "" then
+    local search = TitleList.GetSearch(searchBox)
+    if not searchBox:HasFocus() or search == "" then
         return nil
     end
-    local first = favorites[1] or others[1]
+    local first = FirstNameMatch(favorites, search) or FirstNameMatch(others, search)
+        or favorites[1] or others[1]
     return first and first.id
 end
 

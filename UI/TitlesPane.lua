@@ -16,8 +16,8 @@ local pane, searchBox, filterDropdown
 -- The title Enter in the search box wears (see TitleList.GetEnterChoice).
 local enterChoice
 
--- Shows "No Title", the Random rows, the favourite titles, then the others (each in Blizzard's
--- order), leaving out the titles that don't pass the search and filters. Blizzard's list of titles
+-- Shows "No Title", the Random rows, the favourite titles, then the others (each in the chosen
+-- order, see Titles.Sort), leaving out the titles that don't pass the search and filters. Blizzard's list of titles
 -- isn't changed: "No Title" is a copy with its mark, and the Random rows' IDs (below Blizzard's -1)
 -- never reach the game (see OnCardClick).
 local function FilterList()
@@ -27,8 +27,10 @@ local function FilterList()
             titles[#titles + 1] = playerTitle
         end
     end
+    Titles.Sort(titles)
     local favorites, others = TitleList.SplitFavorites(titles, TitleList.GetSearch(searchBox))
     enterChoice = TitleList.GetEnterChoice(searchBox, favorites, others)
+    TitleList.UpdateSearchCount(searchBox, favorites, others)
     local choices = TitleList.GetRandomRows(titles)
     tinsert(choices, 1, TitleList.CreateChoiceRow(Titles.NO_TITLE))
     local dataProvider = TitleList.CreateDataProvider({ choices, favorites, others })
@@ -83,11 +85,61 @@ local function CreateStar(button)
     return star
 end
 
+-- The character's outfits ({ outfitID, name } each, in the transmog window's order), or none if
+-- the game doesn't give them.
+local function GetOutfits()
+    local outfits = {}
+    for _, info in ipairs(C_TransmogOutfitInfo.GetOutfitsInfo() or {}) do
+        if not issecretvalue(info.outfitID) and not issecretvalue(info.name) then
+            outfits[#outfits + 1] = info
+        end
+    end
+    return outfits
+end
+
+-- A title's right-click menu: Favorite, Hide, and the outfits to wear it with (checked for those
+-- that do; unchecking leaves the outfit without a title).
+local function ShowTitleMenu(button)
+    local titleID = button.titleId
+    MenuUtil.CreateContextMenu(button, function(_, root)
+        root:CreateTitle(Titles.GetChoiceName(titleID))
+        local favorite = Titles.IsFavorite(titleID)
+        root:CreateButton(favorite and BATTLE_PET_UNFAVORITE or BATTLE_PET_FAVORITE, function()
+            Titles.SetFavorite(titleID, not favorite)
+            Refresh()
+        end)
+        local hidden = Titles.IsHidden(titleID)
+        root:CreateButton(hidden and ns.L["Unhide"] or ns.L["Hide"], function()
+            Titles.SetHidden(titleID, not hidden)
+            Refresh()
+        end)
+
+        local outfits = GetOutfits()
+        if #outfits > 0 then
+            local outfitMenu = root:CreateButton(ns.L["Use for outfit"])
+            for _, outfit in ipairs(outfits) do
+                outfitMenu:CreateCheckbox(outfit.name, function()
+                    return ns.Outfits.GetChoice(outfit.outfitID) == titleID
+                end, function()
+                    local used = ns.Outfits.GetChoice(outfit.outfitID) == titleID
+                    ns.Outfits.SetChoice(outfit.outfitID, used and Titles.KEEP or titleID)
+                    ns.Outfits.OnChoiceChanged(outfit.outfitID)
+                end)
+            end
+        end
+    end)
+end
+
 -- Turns one of Blizzard's title rows into a card, the first time it's shown: the text takes the
 -- width the check mark had, a star marks favourites, and the outline shows the chosen title.
--- A Random row wears a random title; the others do what Blizzard's do (wear their title).
-local function OnCardClick(button)
-    if button.titleId == Titles.RANDOM or button.titleId == Titles.RANDOM_FAVORITE then
+-- A Random row wears a random title; the others do what Blizzard's do (wear their title). A right
+-- click on a title opens its menu (see ShowTitleMenu).
+local function OnCardClick(button, mouseButton)
+    if mouseButton == "RightButton" then
+        if button.titleId > 0 then
+            ShowTitleMenu(button)
+        end
+    elseif button.titleId == Titles.RANDOM or button.titleId == Titles.RANDOM_FAVORITE then
         PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
         ns.WearRandomTitle(button.titleId == Titles.RANDOM_FAVORITE)
     else
@@ -103,6 +155,7 @@ local function CreateCard(button)
     button.MarqueeStar = CreateStar(button)
     button.MarqueeStar:SetPoint("RIGHT", button.MarqueeFill, "RIGHT", -6, 0)
     button:GetHighlightTexture():SetAlpha(0)
+    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetScript("OnClick", OnCardClick)
     -- The right side is set by TitleList.FitText.
     button.text:ClearAllPoints()
@@ -150,8 +203,9 @@ local function UpdateOptionsButton(button, hovered)
     texture:SetVertexColor(active and 1 or 0.8, active and 1 or 0.8, active and 1 or 0.8)
 end
 
--- The gear next to the search box: this character's settings, and a button at the bottom for the
--- account's settings in Blizzard's Options (which can't be opened in combat).
+-- The gear next to the search box: the order of the titles (for all characters), this character's
+-- settings, and a button at the bottom for the account's settings in Blizzard's Options (which
+-- can't be opened in combat).
 local function ShowOptionsMenu(button)
     MenuUtil.CreateContextMenu(button, function(_, root)
         root:AddMenuAcquiredCallback(function()
@@ -162,6 +216,21 @@ local function ShowOptionsMenu(button)
             button.menuOpen = false
             UpdateOptionsButton(button, button:IsMouseOver())
         end)
+        root:CreateTitle(ns.L["Sort by"])
+        for _, sort in ipairs({
+            { Titles.SORT_NAME, NAME },
+            { Titles.SORT_EXPANSION, EXPANSION_FILTER_TEXT },
+            { Titles.SORT_ACTIVITY, ns.L["Activity"] },
+        }) do
+            root:CreateRadio(sort[2], function()
+                return Titles.GetSort() == sort[1]
+            end, function()
+                Titles.SetSort(sort[1])
+                Refresh()
+            end)
+        end
+
+        root:CreateDivider()
         root:CreateTitle(UnitName("player"))
         local ownFavorites = root:CreateCheckbox(ns.L["Own favorites for this character"], function()
             -- (== true only tells the IDE it's a boolean; it can't follow functions on ns.)

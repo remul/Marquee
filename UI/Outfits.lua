@@ -4,8 +4,8 @@ local Titles = ns.Titles
 
 -- A title for each transmog outfit, chosen in the transmog window's character preview (see
 -- OutfitPicker) and worn when the outfit is put on by hand: from the transmog window (its icon, or
--- saving changes to it, which puts it on too), or with the outfit on one of Blizzard's action bars
--- (click or key). Choosing a title for the outfit you're wearing wears it right away. Setting a
+-- saving changes to it, which puts it on too), or with the outfit on an action bar (click or key):
+-- Blizzard's, Dominos', or one made with LibActionButton (Bartender, ElvUI). Choosing a title for the outfit you're wearing wears it right away. Setting a
 -- title needs a click or key press, so outfits the game switches to by itself (situations) wear
 -- their title later (see SituationTitles).
 local Outfits = {}
@@ -105,30 +105,102 @@ local function GetActionOutfit(slot)
     return actionID
 end
 
--- An action button was used: by a click (PostClick) or its key (TryUseActionButton). Both run on
--- press and on release; the action itself happens on one of them, depending on the "Cast action
--- keybinds on key down" setting, so the title changes only then.
-local function OnActionButtonUsed(button, isDown)
-    if not button.action or isDown ~= C_CVar.GetCVarBool("ActionButtonUseKeyDown") then
+-- True if a button acts on press (isDown) rather than release: its own setting, or else the "Cast
+-- action keybinds on key down" setting.
+local function ActsOn(button, isDown)
+    local onDown = button:GetAttribute("useOnKeyDown")
+    if onDown == nil then
+        onDown = C_CVar.GetCVarBool("ActionButtonUseKeyDown")
+    end
+    return isDown == (onDown and true or false)
+end
+
+-- An action slot was used from button: by a click (PostClick) or its key (TryUseActionButton for
+-- Blizzard's bars, a click for the others). Both run on press and on release; the action itself
+-- happens on one of them, so the title changes only then.
+local function OnActionUsed(button, slot, isDown)
+    if not slot or not ActsOn(button, isDown) then
         return
     end
-    local outfitID = GetActionOutfit(button.action)
+    local outfitID = GetActionOutfit(slot)
     if outfitID then
-        OnOutfitUsed(outfitID, C_ActionBar.GetActionCooldown(button.action))
+        OnOutfitUsed(outfitID, C_ActionBar.GetActionCooldown(slot))
     end
+end
+
+local function OnActionButtonUsed(button, isDown)
+    OnActionUsed(button, button.action, isDown)
 end
 
 local hookedButtons = {}
 
-local function HookActionButton(button)
+-- Hooks a button's clicks; getSlot(button) gives the action slot it uses (nil for none).
+local function HookButton(button, getSlot)
     if hookedButtons[button] then
         return
     end
     hookedButtons[button] = true
     button:HookScript("PostClick", function(_, _, down)
-        OnActionButtonUsed(button, down)
+        OnActionUsed(button, getSlot(button), down)
         -- After the outfit's own title, so an outfit used drops a title waiting for another.
         ns.SituationTitles.OnInput()
+    end)
+end
+
+local function GetButtonAction(button)
+    return button.action
+end
+
+local function HookActionButton(button)
+    HookButton(button, GetButtonAction)
+end
+
+-- Dominos: its buttons are Blizzard's kind, and their keys click a hidden button on each (bind)
+-- that uses its parent's action.
+local function GetParentAction(bind)
+    return bind:GetParent().action
+end
+
+local function HookDominosButton(button)
+    HookActionButton(button)
+    if button.bind then
+        HookButton(button.bind, GetParentAction)
+    end
+end
+
+local function SetupDominos()
+    local buttons = Dominos and Dominos.ActionButtons
+    if not buttons or not buttons.AddCastOnKeyPressSupport then
+        return
+    end
+    for button in pairs(buttons.buttons or {}) do
+        HookDominosButton(button)
+    end
+    -- Buttons made later get their key's button here.
+    hooksecurefunc(buttons, "AddCastOnKeyPressSupport", function(_, button)
+        HookDominosButton(button)
+    end)
+end
+
+-- LibActionButton (Bartender, and ElvUI's own copy): keys click the buttons too. A button's
+-- action is only an action slot while it holds one (it can also hold a spell, item, ...).
+local function GetLibAction(button)
+    local kind, action = button:GetAction()
+    if kind == "action" then
+        return action
+    end
+end
+
+local function SetupLibActionButton(name)
+    local lib = LibStub and LibStub(name, true)
+    if not lib or not lib.buttonRegistry or not lib.RegisterCallback then
+        return
+    end
+    for button in pairs(lib.buttonRegistry) do
+        HookButton(button, GetLibAction)
+    end
+    lib.RegisterCallback(Outfits, "OnButtonCreated", function(_, button)
+        HookButton(button, GetLibAction)
     end)
 end
 
@@ -153,6 +225,14 @@ function Outfits:Setup()
         end)
     end
     hooksecurefunc("TryUseActionButton", OnActionButtonUsed)
+
+    -- Other action bars, only if they're loaded: Dominos once it is, and the libraries once all
+    -- addons are (they come with the addons that use them).
+    EventUtil.ContinueOnAddOnLoaded("Dominos", SetupDominos)
+    EventUtil.ContinueOnPlayerLogin(function()
+        SetupLibActionButton("LibActionButton-1.0")
+        SetupLibActionButton("LibActionButton-1.0-ElvUI")
+    end)
 
     hooksecurefunc(GameTooltip, "SetOutfit", AddTooltipLine)
     hooksecurefunc(GameTooltip, "SetAction", function(tooltip, slot)

@@ -55,6 +55,14 @@ function TitleList.SplitFavorites(titles, search)
     return favorites, others
 end
 
+-- The search box's placeholder: how many titles the list has (that pass the filters), e.g.
+-- "Search 142 titles". It only shows while the search is empty, when the list has them all.
+function TitleList.UpdateSearchCount(searchBox, favorites, others)
+    if TitleList.GetSearch(searchBox) == "" then
+        searchBox.Instructions:SetText(format(ns.L["Search %d titles"], #favorites + #others))
+    end
+end
+
 -- The first of titles ({ id, name } each) whose name contains the search, or nil.
 local function FirstNameMatch(titles, search)
     for _, title in ipairs(titles) do
@@ -208,39 +216,46 @@ function TitleList.UpdateDivider(row, shown)
     row:SetHitRectInsets(0, 0, 0, shown and DIVIDER_SPACE or 0)
 end
 
--- Rows that do something rather than being a title (IDs below 1) are white, titles gold.
+-- Rows that do something rather than being a title (IDs below 1) are white, titles gold, hidden
+-- titles (while the Filter menu shows them) grey.
 function TitleList.SetTextColor(fontString, choice)
-    local color = choice < 1 and HIGHLIGHT_FONT_COLOR or NORMAL_FONT_COLOR
+    local color = choice < 1 and HIGHLIGHT_FONT_COLOR or Titles.IsHidden(choice) and GRAY_FONT_COLOR
+        or NORMAL_FONT_COLOR
     fontString:SetTextColor(color:GetRGB())
 end
 
--- How many of the character's titles each expansion and activity has: expansions, activities.
-local function CountTitles()
-    local expansions, activities = {}, {}
+-- Counts how many of the character's titles each expansion and activity has, into expansions and
+-- activities ([key] = count). Hidden titles count as the Filter menu's Hidden titles choice shows
+-- them.
+local function CountTitles(expansions, activities)
+    wipe(expansions)
+    wipe(activities)
     for _, titleID in ipairs(Titles.GetKnownTitleIDs()) do
-        local expansion, activity = Titles.GetTags(titleID)
-        if expansion then
-            expansions[expansion] = (expansions[expansion] or 0) + 1
+        if Titles.PassesHidden(titleID) then
+            local expansion, activity = Titles.GetTags(titleID)
+            if expansion then
+                expansions[expansion] = (expansions[expansion] or 0) + 1
+            end
+            activities[activity] = (activities[activity] or 0) + 1
         end
-        activities[activity] = (activities[activity] or 0) + 1
     end
-    return expansions, activities
 end
 
 -- Space between an option's name and its number of titles, and the number's grey.
 local COUNT_GAP = 12
 local COUNT_COLOR = CreateColor(0.7, 0.7, 0.7)
 
--- Shows an option's number of titles in grey at the right edge of the menu, so the numbers line
--- up. Returns the checkbox's size, as the menu can't work it out with text on both sides.
-local function AddCount(checkbox, count)
+-- Shows an option's number of titles (from counts) in grey at the right edge of the menu, so the
+-- numbers line up. Read when the submenu opens, so a change to Hidden titles shows. Returns the
+-- checkbox's size, as the menu can't work it out with text on both sides.
+local function AddCount(checkbox, counts, option)
     checkbox:AddInitializer(function(button)
         local countText = button:AttachFontString()
         countText:SetHeight(20)
         countText:SetPoint("RIGHT", 0, 1)
         countText:SetJustifyH("RIGHT")
         countText:SetTextColor(COUNT_COLOR:GetRGB())
-        countText:SetText(count)
+        countText:SetText(counts[option] or 0)
         local width = button.leftTexture1:GetWidth() + 7 + button.fontString:GetUnboundedStringWidth()
             + COUNT_GAP + countText:GetUnboundedStringWidth()
         return width, 20
@@ -267,18 +282,19 @@ local function AddOptions(menu, changed, options, getName, counts, isShown, setS
             setShown(option, not isShown(option))
             changed()
         end)
-        AddCount(checkbox, counts[option] or 0)
+        AddCount(checkbox, counts, option)
     end
 end
 
 -- Makes dropdown (a WowStyle1FilterDropdownTemplate) the Filter button: expansions and activities,
 -- each with how many titles the character has there (not narrowed by the other filter or the
--- search), with the reset button while something is hidden. changed() runs after every change.
--- The filters are the same everywhere (see Titles).
+-- search), and whether hidden titles show, with the reset button while something is filtered.
+-- changed() runs after every change. The filters are the same everywhere (see Titles).
 function TitleList.SetupFilterDropdown(dropdown, changed)
     dropdown:SetText(FILTER)
     dropdown:SetupMenu(function(_, root)
-        local expansionCounts, activityCounts = CountTitles()
+        local expansionCounts, activityCounts = {}, {}
+        CountTitles(expansionCounts, activityCounts)
         -- Newest expansion first.
         local expansions = {}
         for expansion = Titles.NUM_EXPANSIONS - 1, 0, -1 do
@@ -288,6 +304,21 @@ function TitleList.SetupFilterDropdown(dropdown, changed)
             expansionCounts, Titles.IsExpansionShown, Titles.SetExpansionShown, Titles.SetAllExpansionsShown)
         AddOptions(root:CreateButton(ns.L["Activity"]), changed, Titles.ACTIVITIES, Titles.GetActivityName,
             activityCounts, Titles.IsActivityShown, Titles.SetActivityShown, Titles.SetAllActivitiesShown)
+        local hidden = root:CreateButton(ns.L["Hidden titles"])
+        for _, mode in ipairs({
+            { Titles.HIDE_HIDDEN, ns.L["Hide hidden titles"] },
+            { Titles.ONLY_HIDDEN, ns.L["Only hidden titles"] },
+            { Titles.ALL_TITLES, ns.L["All titles"] },
+        }) do
+            hidden:CreateRadio(mode[2], function()
+                return Titles.GetHiddenMode() == mode[1]
+            end, function()
+                Titles.SetHiddenMode(mode[1])
+                CountTitles(expansionCounts, activityCounts)
+                changed()
+                return MenuResponse.Refresh
+            end)
+        end
     end)
     dropdown:SetIsDefaultCallback(function()
         return not Titles.IsFiltered()

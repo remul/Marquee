@@ -6,10 +6,6 @@ Planned features, ideas and open questions for Marquee. Move an entry to
 Marquee improves Blizzard's Titles list in the Character window. It doesn't add a window of its own,
 and it doesn't track or rate titles (no statistics, rarity or achievements).
 
-## Ideas
-
-- Outfit titles from other action bar addons (Bartender, Dominos, ElvUI): each needs its own hook.
-
 ## Title data
 
 - About 115 titles have no activity yet and show under Other: titles from quests, events or

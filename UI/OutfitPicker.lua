@@ -16,7 +16,7 @@ local PADDING = 10
 local CHEVRON_ATLAS = "uitools-icon-chevron-down"
 
 local preview, selector, picker, filterDropdown, searchBox, scrollBox
--- The character's titles ({ id, name }, by name), read when the picker opens or titles change, so
+-- The character's titles ({ id, name }, in the chosen order, see Titles.Sort), read when the picker opens or titles change, so
 -- typing in the search doesn't read them all again.
 local knownTitles = {}
 -- The title Enter in the search box chooses (see TitleList.GetEnterChoice).
@@ -50,19 +50,18 @@ local function ReadKnownTitles()
     for _, titleID in ipairs(Titles.GetKnownTitleIDs()) do
         knownTitles[#knownTitles + 1] = { id = titleID, name = Titles.GetChoiceName(titleID) }
     end
-    table.sort(knownTitles, function(a, b)
-        return a.name < b.name
-    end)
+    Titles.Sort(knownTitles)
 end
 
 -- The rows: Don't change, No Title, Random, Random Favorite, then the character's titles
--- (favourites first, then by name) that pass the search and filters.
+-- (favourites first, each in the chosen order) that pass the search and filters.
 local function Refresh()
     if not picker:IsShown() then
         return
     end
     local favorites, others = TitleList.SplitFavorites(knownTitles, TitleList.GetSearch(searchBox))
     enterChoice = TitleList.GetEnterChoice(searchBox, favorites, others)
+    TitleList.UpdateSearchCount(searchBox, favorites, others)
     local choices = { TitleList.CreateChoiceRow(Titles.KEEP), TitleList.CreateChoiceRow(Titles.NO_TITLE) }
     for _, row in ipairs(TitleList.GetRandomRows(knownTitles)) do
         choices[#choices + 1] = row

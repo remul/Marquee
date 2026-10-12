@@ -13,11 +13,15 @@ in your Character window, so there's no new window to open.
   found.
 - **Filter** your titles by expansion and by activity, like raids, dungeons, Delves, PvP or
   reputation.
+- **Sort** your titles by name, expansion or activity.
 - **Favorites:** click the star on a title to keep it at the top of the list. Favorites are shared
   by all your characters, or each character can have its own.
+- **Hide titles** you never want to see: right-click a title, then Hide. The Filter menu can
+  show them again.
 - **Random title:** wear a random title, or a random favorite, with one click.
-- **A title for each outfit:** in the transmog window, pick a title for an outfit. When you put the
-  outfit on, you wear its title too.
+- **A title for each outfit:** in the transmog window, or by right-clicking a title, pick a title
+  for an outfit. When you put the outfit on, you wear its title too. This works from Blizzard's
+  action bars, Bartender, Dominos and ElvUI.
 
 ## How to use it
 

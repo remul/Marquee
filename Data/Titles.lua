@@ -81,14 +81,96 @@ function Titles.SetAllActivitiesShown(shown)
     end
 end
 
--- True while any filter hides something.
+-- Hidden titles (see Core's hiddenTitles), and which titles the lists show for them: not the
+-- hidden ones (HIDE_HIDDEN, the default), only them, or all. Not saved, so the lists always start
+-- without the titles you hid.
+Titles.HIDE_HIDDEN = "hide"
+Titles.ONLY_HIDDEN = "only"
+Titles.ALL_TITLES = "all"
+local hiddenMode = Titles.HIDE_HIDDEN
+
+function Titles.IsHidden(titleID)
+    return ns.db.hiddenTitles[titleID] == true
+end
+
+function Titles.SetHidden(titleID, hidden)
+    ns.db.hiddenTitles[titleID] = hidden or nil
+end
+
+function Titles.GetHiddenMode()
+    return hiddenMode
+end
+
+function Titles.SetHiddenMode(mode)
+    hiddenMode = mode
+end
+
+-- True if the lists show the title, as far as hidden titles go.
+function Titles.PassesHidden(titleID)
+    if hiddenMode == Titles.ALL_TITLES then
+        return true
+    end
+    return Titles.IsHidden(titleID) == (hiddenMode == Titles.ONLY_HIDDEN)
+end
+
+-- True while any filter hides something, or hidden titles show.
 function Titles.IsFiltered()
     return next(ns.db.hiddenExpansions) ~= nil or next(ns.db.hiddenActivities) ~= nil
+        or hiddenMode ~= Titles.HIDE_HIDDEN
 end
 
 function Titles.ResetFilters()
     wipe(ns.db.hiddenExpansions)
     wipe(ns.db.hiddenActivities)
+    hiddenMode = Titles.HIDE_HIDDEN
+end
+
+-- Orders of the titles in the lists, chosen in the gear menu above the Titles list: by name (as
+-- Blizzard's list), by expansion (newest first, as in the Filter menu) or by activity (in the
+-- Filter menu's order). Titles with the same expansion or activity are sorted by name.
+Titles.SORT_NAME = "name"
+Titles.SORT_EXPANSION = "expansion"
+Titles.SORT_ACTIVITY = "activity"
+
+local activityOrder = tInvert(Titles.ACTIVITIES)
+
+-- A title's place in the chosen order, before its name: higher expansions first (titles newer than
+-- the data count as the newest), activities by their menu order.
+local function GetSortKey(titleID, sort)
+    local expansion, activity = Titles.GetTags(titleID)
+    if sort == Titles.SORT_EXPANSION then
+        return -(expansion or Titles.NUM_EXPANSIONS)
+    elseif sort == Titles.SORT_ACTIVITY then
+        return activityOrder[activity] or #Titles.ACTIVITIES
+    end
+    return 0
+end
+
+function Titles.GetSort()
+    local sort = ns.db.titleSort
+    if sort == Titles.SORT_EXPANSION or sort == Titles.SORT_ACTIVITY then
+        return sort
+    end
+    return Titles.SORT_NAME
+end
+
+function Titles.SetSort(sort)
+    ns.db.titleSort = sort
+end
+
+-- Sorts titles ({ id, name } each) in the chosen order.
+function Titles.Sort(titles)
+    local sort = Titles.GetSort()
+    local keys = {}
+    for _, title in ipairs(titles) do
+        keys[title] = GetSortKey(title.id, sort)
+    end
+    table.sort(titles, function(a, b)
+        if keys[a] ~= keys[b] then
+            return keys[a] < keys[b]
+        end
+        return a.name < b.name
+    end)
 end
 
 -- Lowercase names, so typing in a search doesn't lowercase every title, expansion and activity
@@ -109,9 +191,12 @@ function Titles.NameMatches(name, search)
     return Contains(name, search)
 end
 
--- True if the title passes the filters, and its name, expansion or activity contains the
+-- True if the title passes the filters (hidden titles too), and its name, expansion or activity contains the
 -- (lowercase) search: "legion" finds Legion's titles, "pvp" the PvP ones.
 function Titles.Passes(titleID, name, search)
+    if not Titles.PassesHidden(titleID) then
+        return false
+    end
     local expansion, activity = Titles.GetTags(titleID)
     if expansion and not Titles.IsExpansionShown(expansion) then
         return false
@@ -176,7 +261,7 @@ local function GetRandomChoices(favoritesOnly)
     local current = GetCurrentTitle()
     local choices, others = {}, {}
     for _, titleID in ipairs(Titles.GetKnownTitleIDs()) do
-        if not favoritesOnly or Titles.IsFavorite(titleID) then
+        if (not favoritesOnly or Titles.IsFavorite(titleID)) and not Titles.IsHidden(titleID) then
             tinsert(titleID == current and choices or others, titleID)
         end
     end

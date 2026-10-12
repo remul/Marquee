@@ -15,9 +15,13 @@ local DEFAULTS = {
     -- Favourite titles shared by the account's characters, shown first in the Titles list:
     -- [titleID] = true.
     favoriteTitles = {},
+    -- Titles hidden from the lists and from Random (right-click a title, Hide): [titleID] = true.
+    hiddenTitles = {},
     -- What happens when the game puts on an outfit by itself (see SituationTitles): wear its title
     -- with the next "click", "ask" to wear it, or "off".
     situationTitles = "click",
+    -- The order of the titles in the lists (see Titles.Sort): "name", "expansion" or "activity".
+    titleSort = "name",
 }
 
 local CHAR_DEFAULTS = {

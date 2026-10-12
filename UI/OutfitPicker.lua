@@ -16,8 +16,8 @@ local PADDING = 10
 local CHEVRON_ATLAS = "uitools-icon-chevron-down"
 
 local preview, selector, picker, filterDropdown, searchBox, scrollBox
--- The character's titles ({ id, name }, in the chosen order, see Titles.Sort), read when the picker opens or titles change, so
--- typing in the search doesn't read them all again.
+-- The character's titles ({ id, name }, in the chosen order, see Titles.Sort), read when the
+-- picker opens or titles change, so typing in the search doesn't read them all again.
 local knownTitles = {}
 -- The title Enter in the search box chooses (see TitleList.GetEnterChoice).
 local enterChoice

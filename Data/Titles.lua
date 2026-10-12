@@ -187,12 +187,10 @@ local function Contains(name, search)
 end
 
 -- True if the title's name contains the (lowercase) search.
-function Titles.NameMatches(name, search)
-    return Contains(name, search)
-end
+Titles.NameMatches = Contains
 
--- True if the title passes the filters (hidden titles too), and its name, expansion or activity contains the
--- (lowercase) search: "legion" finds Legion's titles, "pvp" the PvP ones.
+-- True if the title passes the filters (hidden titles too), and its name, expansion or activity
+-- contains the (lowercase) search: "legion" finds Legion's titles, "pvp" the PvP ones.
 function Titles.Passes(titleID, name, search)
     if not Titles.PassesHidden(titleID) then
         return false

@@ -51,7 +51,8 @@ The random commands also work in a macro.
 
 ## Languages
 
-English, German, French, Italian and Russian.
+English, German, French, Italian, Russian, Spanish, Portuguese, Chinese (simplified and
+traditional) and Korean.
 
 Is your language missing, or does a text read wrong? Let me know in an
 [issue](https://github.com/remul/Marquee/issues). Help with translations is welcome.

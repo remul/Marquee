@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0
+
+- **Sort** the titles by name, expansion or activity, in the gear menu next to the search box.
+  The outfit title picker uses the same order.
+- **Search finds expansions and activities too**: "legion" shows Legion's titles, "pvp" the PvP
+  ones. The empty search box says how many titles the list has.
+- **Enter in the search box** wears the first title found (in the outfit title picker: chooses
+  it). Favorites and titles found by name come first; the card Enter would pick is highlighted.
+- **Right-click a title** for Favorite, Hide, and **Use for outfit** to give it to one of your
+  outfits straight from the Titles list.
+- **Hide titles** you never want to see. Hidden titles are left out of the lists and of Random;
+  the Filter menu's **Hidden titles** shows them again (only them, or all titles).
+- **The Filter menu shows how many titles** each expansion and activity has.
+- **Outfit titles from Bartender, Dominos and ElvUI** action bars, by click and by key.
+- **New languages**: Spanish, Portuguese, Simplified and Traditional Chinese, and Korean.
+- Fixed: Random Favorite showed when all favorites were hidden, and then had none to pick.
+
 ## 0.2.2
 
 - **Outfit titles for outfits the game puts on by itself** are now worn with your next key press,

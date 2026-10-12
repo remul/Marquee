@@ -31,11 +31,11 @@ function TitleList.CreateChoiceRow(choice)
 end
 
 -- The Random rows; Random Favorite only if one of titles (the character's, { id, name } each) is a
--- favourite, whatever the search and filters show.
+-- favourite it can pick (not hidden), whatever the search and filters show.
 function TitleList.GetRandomRows(titles)
     local rows = { TitleList.CreateChoiceRow(Titles.RANDOM) }
     for _, title in ipairs(titles) do
-        if Titles.IsFavorite(title.id) then
+        if Titles.IsFavorite(title.id) and not Titles.IsHidden(title.id) then
             rows[#rows + 1] = TitleList.CreateChoiceRow(Titles.RANDOM_FAVORITE)
             break
         end
@@ -241,7 +241,9 @@ local function CountTitles(expansions, activities)
     end
 end
 
--- Space between an option's name and its number of titles, and the number's grey.
+-- Space between a checkbox's box and its name (as Blizzard's MenuVariants.CreateCheckbox sets it),
+-- between the name and its number of titles, and the number's grey.
+local CHECKBOX_TEXT_GAP = 7
 local COUNT_GAP = 12
 local COUNT_COLOR = CreateColor(0.7, 0.7, 0.7)
 
@@ -256,7 +258,7 @@ local function AddCount(checkbox, counts, option)
         countText:SetJustifyH("RIGHT")
         countText:SetTextColor(COUNT_COLOR:GetRGB())
         countText:SetText(counts[option] or 0)
-        local width = button.leftTexture1:GetWidth() + 7 + button.fontString:GetUnboundedStringWidth()
+        local width = button.leftTexture1:GetWidth() + CHECKBOX_TEXT_GAP + button.fontString:GetUnboundedStringWidth()
             + COUNT_GAP + countText:GetUnboundedStringWidth()
         return width, 20
     end)

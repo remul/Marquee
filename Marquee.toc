@@ -2,7 +2,7 @@
 ## Title: Marquee
 ## Notes: A simpler way to choose your title, in the Character window.
 ## Author: Remul
-## Version: 0.2.2
+## Version: 0.3.0
 ## SavedVariables: MarqueeDB
 ## SavedVariablesPerCharacter: MarqueeCharDB
 ## IconTexture: Interface\AddOns\Marquee\Media\Icon
@@ -24,6 +24,11 @@ Locales\deDE.lua
 Locales\frFR.lua
 Locales\itIT.lua
 Locales\ruRU.lua
+Locales\esES.lua
+Locales\ptBR.lua
+Locales\zhCN.lua
+Locales\zhTW.lua
+Locales\koKR.lua
 Core.lua
 Data\TitleData.lua
 Data\Titles.lua

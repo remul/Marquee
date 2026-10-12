@@ -2,96 +2,52 @@
 
 # Marquee
 
-A simpler way to choose your title in World of Warcraft (Retail). Marquee works inside Blizzard's
-Character window: it improves the Titles list that's already there instead of adding a window of
-its own, and looks and feels like the rest of the game's interface.
+Marquee makes it easier to pick a title in World of Warcraft (Retail). It adds to the Titles list
+in your Character window, so there's no new window to open.
 
-**Status:** early development.
+<p align="center"><img src="Screenshots/titles-list.png" alt="The Titles list with Marquee"></p>
 
-## Features
-
-### Titles list
+## What it does
 
 - **Search** your titles by name.
-- **Filter** them by expansion and by activity (raids, dungeons, Delves, PvP, world events,
-  reputation, quests, professions and more), like the Pet Journal's Filter button. The filters are
-  saved; the Filter button's reset shows all titles again.
-- Titles are cards; the one you wear has a gold outline. Lines divide the list into No Title and
-  Random, your favourites, and your other titles.
+- **Filter** your titles by expansion and by activity, like raids, dungeons, Delves, PvP or
+  reputation.
+- **Favorites:** click the star on a title to keep it at the top of the list. Favorites are shared
+  by all your characters, or each character can have its own.
+- **Random title:** wear a random title, or a random favorite, with one click.
+- **A title for each outfit:** in the transmog window, pick a title for an outfit. When you put the
+  outfit on, you wear its title too.
 
-### Favourites
+## How to use it
 
-- Click a title's star to make it a favourite. Favourites come first, right after No Title.
-- Favourites are shared by your characters. A character can keep its own instead: the gear next to
-  the search box, **Own favorites for this character**.
+Open your Character window (`C`) and go to the Titles tab, or type `/marquee`.
 
-### Random titles
-
-- **Random** and **Random Favorite** below No Title wear a random title, or a random favourite.
-- `/marquee random` and `/marquee random favorite` do the same, e.g. from a macro.
-
-### A title for each outfit
-
-- In the transmog window, **Title** at the top right of the character preview shows the outfit's
-  title. Click it to choose one from a list like the Titles list (filters, search, favourites).
-- Putting the outfit on wears its title: in the transmog window (clicking the outfit, or saving
-  changes to it), or with the outfit on Blizzard's action bars (click or key). Choosing a title for
-  the outfit you're wearing wears it right away. The outfit's tooltip shows its title.
-- The game only lets addons change your title from a click or key press. When the game puts on an
-  outfit by itself (its situations, set in the transmog window), Marquee asks whether to wear the
-  outfit's title. In Options you can have your next key press, or click on the game world or an
-  action button, wear it instead, or leave the title as it is. Never in combat: the title waits
-  until the fight ends. Using an outfit while it's on cooldown doesn't change the title.
-
-### Settings
-
-The gear next to the search box has this character's settings, and opens Marquee's settings for
-all your characters in Blizzard's Options (AddOns tab).
-
-## Installation
-
-Copy the `Marquee` folder into `World of Warcraft/_retail_/Interface/AddOns/` and restart the game.
-
-Open the Character window (`C`) and its Titles tab, or type `/marquee`.
+The gear next to the search box has the settings. More settings are in Blizzard's Options, on the
+AddOns tab.
 
 ## Commands
 
-| Command                    | Description                                  |
-|----------------------------|----------------------------------------------|
-| `/marquee`                 | Open the Character window on the Titles list |
-| `/marquee random`          | Wear a random title                          |
-| `/marquee random favorite` | Wear a random favorite title                 |
-| `/marquee debug`           | Turn debug messages on or off                |
+| Command                    | What it does                       |
+|----------------------------|------------------------------------|
+| `/marquee`                 | Open the Titles list               |
+| `/marquee random`          | Wear a random title                |
+| `/marquee random favorite` | Wear a random favorite title       |
+
+The random commands also work in a macro.
+
+## Good to know
+
+- The game only lets addons change your title when you click or press a key. If the game changes
+  your outfit by itself, Marquee waits for your next key press or click, then wears the outfit's
+  title. In the settings you can have Marquee ask first instead.
+- Your title never changes during combat. It changes when the fight is over.
 
 ## Languages
 
-Marquee uses the language of your game client. English, German, French, Italian and Russian are
-available; translations are in `Locales/`.
+English, German, French, Italian and Russian.
 
-**Help with translations is welcome:** if your language is missing or a text reads wrong, open an
-[issue](https://github.com/remul/Marquee/issues) or a pull request. To add a language, copy
-`Locales/deDE.lua`, change the locale code (e.g. `esES`), translate the text on the right of each
-line and add the file to `Marquee.toc`.
-
-## Development
-
-Marquee is Lua with no build step. Link the repository into the AddOns folder and use `/reload` in
-game to load changes:
-
-```sh
-ln -s "$(pwd)" "/Applications/World of Warcraft/_retail_/Interface/AddOns/Marquee"
-```
-
-Each title's expansion and activity is in `Data/TitleData.lua`, generated from Blizzard's game
-data: titles an achievement rewards take its category, the others are tagged by name rules and by
-hand. After a patch that adds titles, run `python3 tools/generate_title_data.py` (it downloads the
-current tables from [wago.tools](https://wago.tools)), tag the titles it lists in the script's
-`OVERRIDES`, and commit the result.
-
-Releases are built by the [BigWigs packager](https://github.com/BigWigsMods/packager) (see
-`.pkgmeta`) when a version tag is pushed. Before tagging, set `## Version` in `Marquee.toc` to the
-same version. Changes are listed in [CHANGELOG.md](CHANGELOG.md); planned features, ideas and known
-issues in [ROADMAP.md](ROADMAP.md).
+Is your language missing, or does a text read wrong? Let me know in an
+[issue](https://github.com/remul/Marquee/issues). Help with translations is welcome.
 
 ## License
 

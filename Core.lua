@@ -15,9 +15,9 @@ local DEFAULTS = {
     -- Favourite titles shared by the account's characters, shown first in the Titles list:
     -- [titleID] = true.
     favoriteTitles = {},
-    -- What happens when the game puts on an outfit by itself (see SituationTitles): "ask" to wear
-    -- its title, wear it with the next "click", or "off".
-    situationTitles = "ask",
+    -- What happens when the game puts on an outfit by itself (see SituationTitles): wear its title
+    -- with the next "click", "ask" to wear it, or "off".
+    situationTitles = "click",
 }
 
 local CHAR_DEFAULTS = {

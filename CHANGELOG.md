@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+- **Outfit titles for outfits the game puts on by itself** are now worn with your next key press,
+  or click on the game world or an action button, instead of asking first. Asking is still in
+  Options (**When the game changes your outfit**). Characters that already have a setting keep it.
+- **Simpler README**, written for players.
+
 ## 0.2.1
 
 - **Long titles fit better** in the Titles list and the outfit title picker: titles too long for a

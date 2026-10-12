@@ -35,10 +35,10 @@ local hidingPrompt = false
 
 local function GetMode()
     local mode = ns.db.situationTitles
-    if mode == SituationTitles.CLICK or mode == SituationTitles.OFF then
+    if mode == SituationTitles.ASK or mode == SituationTitles.OFF then
         return mode
     end
-    return SituationTitles.ASK
+    return SituationTitles.CLICK
 end
 
 -- The outfit worn (0 for none), or nil if the game hides it from addons (e.g. in combat).

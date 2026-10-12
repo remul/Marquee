@@ -40,10 +40,10 @@ function Options:Setup()
     local SituationTitles = ns.SituationTitles
     AddSection(L["Outfit titles"])
     local situationTitles = AddDropdown("situationTitles", L["When the game changes your outfit"],
-        SituationTitles.ASK, {
-            { SituationTitles.ASK, L["Ask"], L["A prompt asks whether to wear the outfit's title."] },
+        SituationTitles.CLICK, {
             { SituationTitles.CLICK, L["On your next key or click"],
                 L["Your next key press, or click on the game world or an action button, wears the outfit's title."] },
+            { SituationTitles.ASK, L["Ask"], L["A prompt asks whether to wear the outfit's title."] },
             { SituationTitles.OFF, L["Don't change the title"],
                 L["The title only changes when you put an outfit on yourself."] },
         }, L["In some situations the game puts on an outfit by itself (set in the transmog window). Addons can only change your title with a click or key press, so the outfit's title waits for one. Never in combat."])

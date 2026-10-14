@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Updated for patch 12.1.5.
+
 ## 0.3.0
 
 - **Sort** the titles by name, expansion or activity, in the gear menu next to the search box.

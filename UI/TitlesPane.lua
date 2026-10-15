@@ -20,14 +20,27 @@ local enterChoice
 -- order, see Titles.Sort), leaving out the titles that don't pass the search and filters. Blizzard's list of titles
 -- isn't changed: "No Title" is a copy with its mark, and the Random rows' IDs (below Blizzard's -1)
 -- never reach the game (see OnCardClick).
-local function FilterList()
-    local titles = {}
-    for _, playerTitle in ipairs(pane.titles or {}) do
-        if playerTitle.id ~= Titles.NO_TITLE then
-            titles[#titles + 1] = playerTitle
+-- Blizzard's titles without "No Title", sorted: kept while its list and the order stay the same, so
+-- typing a search doesn't sort them all again.
+local sorted = { titles = {} }
+
+local function GetSortedTitles()
+    local source, sort = pane.titles or {}, Titles.GetSort()
+    if sorted.source ~= source or sorted.sort ~= sort or sorted.count ~= #source then
+        local titles = {}
+        for _, playerTitle in ipairs(source) do
+            if playerTitle.id ~= Titles.NO_TITLE then
+                titles[#titles + 1] = playerTitle
+            end
         end
+        Titles.Sort(titles)
+        sorted.source, sorted.sort, sorted.count, sorted.titles = source, sort, #source, titles
     end
-    Titles.Sort(titles)
+    return sorted.titles
+end
+
+local function FilterList()
+    local titles = GetSortedTitles()
     local favorites, others = TitleList.SplitFavorites(titles, TitleList.GetSearch(searchBox))
     enterChoice = TitleList.GetEnterChoice(searchBox, favorites, others)
     TitleList.UpdateSearchCount(searchBox, favorites, others)
@@ -89,8 +102,11 @@ end
 -- the game doesn't give them.
 local function GetOutfits()
     local outfits = {}
+    if not ns.Client.hasOutfits then
+        return outfits
+    end
     for _, info in ipairs(C_TransmogOutfitInfo.GetOutfitsInfo() or {}) do
-        if not issecretvalue(info.outfitID) and not issecretvalue(info.name) then
+        if not ns.Client.IsSecret(info.outfitID) and not ns.Client.IsSecret(info.name) then
             outfits[#outfits + 1] = info
         end
     end

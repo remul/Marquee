@@ -44,7 +44,7 @@ end
 -- The outfit worn (0 for none), or nil if the game hides it from addons (e.g. in combat).
 local function GetActiveOutfitID()
     local outfitID = C_TransmogOutfitInfo.GetActiveOutfitID()
-    if outfitID == nil or issecretvalue(outfitID) then
+    if outfitID == nil or ns.Client.IsSecret(outfitID) then
         return nil
     end
     return outfitID

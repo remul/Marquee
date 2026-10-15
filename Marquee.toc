@@ -1,8 +1,8 @@
-## Interface: 120105
+## Interface: 120105, 16001
 ## Title: Marquee
 ## Notes: A simpler way to choose your title, in the Character window.
 ## Author: Remul
-## Version: 0.3.1
+## Version: 0.4.0
 ## SavedVariables: MarqueeDB
 ## SavedVariablesPerCharacter: MarqueeCharDB
 ## IconTexture: Interface\AddOns\Marquee\Media\Icon
@@ -29,6 +29,7 @@ Locales\ptBR.lua
 Locales\zhCN.lua
 Locales\zhTW.lua
 Locales\koKR.lua
+Compat.lua
 Core.lua
 Data\TitleData.lua
 Data\Titles.lua

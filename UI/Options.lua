@@ -34,9 +34,8 @@ local function AddSection(name)
     layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(name))
 end
 
--- Called once ns.db is loaded.
-function Options:Setup()
-    category, layout = Settings.RegisterVerticalLayoutCategory(ns.TITLE)
+-- The settings for outfit titles (see SituationTitles).
+local function AddOutfitSettings()
     local SituationTitles = ns.SituationTitles
     AddSection(L["Outfit titles"])
     local situationTitles = AddDropdown("situationTitles", L["When the game changes your outfit"],
@@ -48,6 +47,15 @@ function Options:Setup()
                 L["The title only changes when you put an outfit on yourself."] },
         }, L["In some situations the game puts on an outfit by itself (set in the transmog window). Addons can only change your title with a click or key press, so the outfit's title waits for one. Never in combat."])
     situationTitles:SetValueChangedCallback(SituationTitles.OnModeChanged)
+end
+
+-- Called once ns.db is loaded.
+function Options:Setup()
+    category, layout = Settings.RegisterVerticalLayoutCategory(ns.TITLE)
+    -- Outfit titles only where the game has Retail's outfits (see Client).
+    if ns.Client.hasOutfits then
+        AddOutfitSettings()
+    end
 
     AddSection(L["Development"])
     AddCheckbox("debug", L["Debug messages in chat"], L["Shows details in chat, for troubleshooting."])

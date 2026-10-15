@@ -2,7 +2,7 @@
 
 # Marquee
 
-Marquee makes it easier to pick a title in World of Warcraft (Retail). It adds to the Titles list
+Marquee makes it easier to pick a title in World of Warcraft (Retail and WoW Forever). It adds to the Titles list
 in your Character window, so there's no new window to open.
 
 <p align="center"><img src="Screenshots/titles-list.png" alt="The Titles list with Marquee"></p>

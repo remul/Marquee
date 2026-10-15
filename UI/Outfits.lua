@@ -36,7 +36,7 @@ local JUST_NOW = 0.1
 -- outfit did nothing. Cooldowns the game hides from addons (e.g. in combat) count as running.
 local function CouldPutOn(cooldown)
     local start, duration = cooldown.startTime, cooldown.duration
-    if issecretvalue(start) or issecretvalue(duration) then
+    if ns.Client.IsSecret(start) or ns.Client.IsSecret(duration) then
         return false
     end
     local now = GetTime()
@@ -45,7 +45,7 @@ local function CouldPutOn(cooldown)
 end
 
 local function DescribeCooldown(cooldown)
-    if issecretvalue(cooldown.startTime) or issecretvalue(cooldown.duration) then
+    if ns.Client.IsSecret(cooldown.startTime) or ns.Client.IsSecret(cooldown.duration) then
         return "hidden"
     end
     return format("start %.2f, duration %.2f, now %.2f", cooldown.startTime, cooldown.duration, GetTime())
@@ -80,7 +80,7 @@ end
 -- (the game may hide which one that is, e.g. in combat).
 function Outfits.OnChoiceChanged(outfitID)
     local activeID = C_TransmogOutfitInfo.GetActiveOutfitID()
-    if not issecretvalue(activeID) and outfitID == activeID then
+    if not ns.Client.IsSecret(activeID) and outfitID == activeID then
         ns.SituationTitles.Drop()
         WearOutfitTitle(outfitID)
     end
@@ -99,7 +99,7 @@ end
 -- combat); hidden values can't be compared, so they count as no outfit.
 local function GetActionOutfit(slot)
     local actionType, actionID = GetActionInfo(slot)
-    if issecretvalue(actionType) or issecretvalue(actionID) or actionType ~= "outfit" then
+    if ns.Client.IsSecret(actionType) or ns.Client.IsSecret(actionID) or actionType ~= "outfit" then
         return nil
     end
     return actionID

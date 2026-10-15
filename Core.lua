@@ -172,10 +172,12 @@ end
 -- The Titles list is the second sidebar tab of the Character window (see PAPERDOLL_SIDEBARS).
 local TITLES_SIDEBAR = 2
 
--- Opens the Character window on its Titles list.
+-- Opens the Character window on its Titles list (or just the window, where it has none).
 function ns.OpenTitles()
     ToggleCharacter("PaperDollFrame", true)
-    PaperDollFrame_SetSidebar(nil, TITLES_SIDEBAR)
+    if ns.Client.HasTitleList() and PaperDollFrame_SetSidebar then
+        PaperDollFrame_SetSidebar(nil, TITLES_SIDEBAR)
+    end
 end
 
 -- Wears a random title (or favourite) and says which, or why there's none. Needs a click or key
@@ -206,16 +208,24 @@ function ns:ADDON_LOADED(loadedName)
     self.charDb = MarqueeCharDB
     ns.Options:Setup()
 
-    -- The Character window comes with Blizzard_UIPanels_Game.
+    -- The Character window comes with Blizzard_UIPanels_Game; Marquee adds to its Titles list
+    -- where the game has one (see Client).
     EventUtil.ContinueOnAddOnLoaded("Blizzard_UIPanels_Game", function()
-        ns.TitlesPane:Setup()
+        if ns.Client.HasTitleList() then
+            ns.TitlesPane:Setup()
+        end
     end)
-    ns.Outfits:Setup()
-    ns.SituationTitles:Setup()
-    -- The transmog window is loaded when it's first opened.
-    EventUtil.ContinueOnAddOnLoaded("Blizzard_Transmog", function()
-        ns.OutfitPicker:Setup()
-    end)
+    -- Titles for transmog outfits, where the game has Retail's outfits. The transmog window is
+    -- loaded when it's first opened.
+    if ns.Client.hasOutfits then
+        ns.Outfits:Setup()
+        ns.SituationTitles:Setup()
+        EventUtil.ContinueOnAddOnLoaded("Blizzard_Transmog", function()
+            if TransmogFrame and TransmogFrame.CharacterPreview then
+                ns.OutfitPicker:Setup()
+            end
+        end)
+    end
 end
 
 ns:RegisterEvent("ADDON_LOADED")

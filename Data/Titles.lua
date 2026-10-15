@@ -6,19 +6,32 @@ local L = ns.L
 local Titles = {}
 ns.Titles = Titles
 
--- Expansions by their number (0 = Classic), as in the game's EXPANSION_NAME0, 1, ...
-Titles.NUM_EXPANSIONS = 12
+-- Expansions by their number (0 = Classic), as in the game's EXPANSION_NAME0, 1, ...: as many as
+-- the data knows, or the game has (1 in WoW Forever, see Client).
+Titles.NUM_EXPANSIONS = ns.Client.GetNumExpansions(12)
 
 function Titles.GetExpansionName(expansion)
-    return _G["EXPANSION_NAME" .. expansion]
+    return _G["EXPANSION_NAME" .. expansion] or format("%s %d", EXPANSION_FILTER_TEXT or "Expansion", expansion)
 end
 
 -- Activities in menu order (the keys used in TitleData.lua). Labels are Blizzard's own text where
 -- it has one; the others use the names of Blizzard's achievement categories (see Locales).
-Titles.ACTIVITIES = {
+local ALL_ACTIVITIES = {
     "raid", "dungeon", "delves", "pvp", "worldEvents", "reputation", "quests", "exploration",
     "professions", "petBattles", "skyriding", "collections", "features", "featsOfStrength", "other",
 }
+-- The expansion that brought an activity, for games without it (WoW Forever has only the first):
+-- Pet Battles (Mists of Pandaria), Skyriding (Dragonflight), Delves (The War Within), and the
+-- expansions' own features (Legion's order halls and later).
+local ACTIVITY_EXPANSIONS = { petBattles = 4, features = 6, skyriding = 9, delves = 10 }
+
+-- The activities this game has.
+Titles.ACTIVITIES = {}
+for _, activity in ipairs(ALL_ACTIVITIES) do
+    if (ACTIVITY_EXPANSIONS[activity] or 0) < Titles.NUM_EXPANSIONS then
+        Titles.ACTIVITIES[#Titles.ACTIVITIES + 1] = activity
+    end
+end
 
 local ACTIVITY_LABELS = {
     raid = function() return RAIDS end,
@@ -38,8 +51,14 @@ local ACTIVITY_LABELS = {
     other = function() return OTHER end,
 }
 
+-- English names for Blizzard's labels a game doesn't have (see Client).
+local ACTIVITY_FALLBACKS = {
+    raid = "Raids", dungeon = "Dungeons", delves = "Delves", pvp = "PvP", reputation = "Reputation",
+    quests = "Quests", professions = "Professions", skyriding = "Skyriding", other = "Other",
+}
+
 function Titles.GetActivityName(activity)
-    return ACTIVITY_LABELS[activity]()
+    return ACTIVITY_LABELS[activity]() or ACTIVITY_FALLBACKS[activity] or activity
 end
 
 -- A title's expansion (nil if it's newer than the data) and activity ("other" if unknown).

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- **WoW Forever**: Marquee runs there too. The Filter menu offers only the expansions and
+  activities the game has; outfit titles stay in Retail, where its transmog outfits are.
+- The search is quicker: typing no longer sorts all your titles again.
+
 ## 0.3.1
 
 - Updated for patch 12.1.5.
